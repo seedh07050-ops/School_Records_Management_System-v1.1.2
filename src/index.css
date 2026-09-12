@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   A4 2×2 상자 표지 라벨 인쇄 및 미리보기 전용 스타일
+   ========================================================================== */
+
+.a4-print-page {
+  background: #ffffff;
+  width: 210mm;
+  height: 297mm;
+  min-height: 297mm;
+  max-height: 297mm;
+  margin: 16px auto;
+  padding: 10mm 6mm;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.a4-inner-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 95mm);
+  grid-template-rows: repeat(2, 135mm);
+  column-gap: 8mm;
+  row-gap: 8mm;
+  justify-content: center;
+  align-content: center;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.grid-cell {
+  width: 95mm;
+  height: 135mm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    width: 210mm !important;
+    height: auto !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 일반 화면 전체 숨김 */
+  body * {
+    visibility: hidden;
+  }
+
+  /* 인쇄 전용 포털 및 하위 요소만 노출 */
+  #label-print-portal,
+  #label-print-portal * {
+    visibility: visible !important;
+  }
+
+  #label-print-portal {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 210mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    z-index: 9999999 !important;
+    display: block !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .a4-print-page {
+    box-shadow: none !important;
+    margin: 0 !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+  }
+
+  .a4-print-page:last-child {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+}
+

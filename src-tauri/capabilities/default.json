@@ -1,0 +1,27 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "학교 기록물 관리 시스템 Tauri v2 기본 권한 설정",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "dialog:default",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "dialog:allow-message",
+    "dialog:allow-ask",
+    "dialog:allow-confirm",
+    "fs:default",
+    "fs:allow-read-file",
+    "fs:allow-write-file",
+    "fs:allow-exists",
+    "fs:allow-copy-file",
+    "fs:allow-mkdir",
+    {
+      "identifier": "fs:scope",
+      "allow": ["**"]
+    },
+    "shell:default",
+    "shell:allow-open"
+  ]
+}
