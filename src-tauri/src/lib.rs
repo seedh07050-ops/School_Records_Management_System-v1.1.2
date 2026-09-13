@@ -26,12 +26,16 @@ pub struct SaveAllFormsResult {
     pub canceled: Option<bool>,
 }
 
-// 5개 .hwpx 정적 서식 파일의 내장 바이너리 (단일 포터블 .exe 실행 시에도 외부 폴더 없이 100% 보장)
+// 9개 .hwpx 정적 서식 파일의 내장 바이너리 (단일 포터블 .exe 실행 시에도 외부 폴더 없이 100% 보장)
 static FORM_MANAGER_BYTES: &[u8] = include_bytes!("../../public/forms/기록물관리 책임자 지정.hwpx");
 static FORM_IN_OUT_BYTES: &[u8] = include_bytes!("../../public/forms/기록물반출입대장.hwpx");
 static FORM_ARCHIVE_ACCESS_BYTES: &[u8] = include_bytes!("../../public/forms/문서고출입대장.hwpx");
 static FORM_TRANSFER_PLAN_BYTES: &[u8] = include_bytes!("../../public/forms/비전자기록물 이관계획.hwpx");
 static FORM_HANDOVER_BYTES: &[u8] = include_bytes!("../../public/forms/비전자기록물 인계인수서.hwpx");
+static FORM_MINUTES_IN_PERSON_BYTES: &[u8] = include_bytes!("../../public/forms/회의록서식(대면회의).hwpx");
+static FORM_MINUTES_WRITTEN_BYTES: &[u8] = include_bytes!("../../public/forms/회의록서식(서면회의).hwpx");
+static FORM_DISCARDED_SEAL_BYTES: &[u8] = include_bytes!("../../public/forms/폐기공인 이관.hwpx");
+static FORM_HISTORICAL_ARTIFACTS_BYTES: &[u8] = include_bytes!("../../public/forms/교육행정박물관리대장.hwpx");
 
 /// 서식 파일의 실제 바이트 데이터 조회
 /// 1) 번들된 리소스 디렉터리 및 디스크 경로 검색
@@ -79,6 +83,10 @@ fn get_form_bytes(app: &tauri::AppHandle, file_name: &str) -> Option<Vec<u8>> {
         "문서고출입대장.hwpx" => Some(FORM_ARCHIVE_ACCESS_BYTES.to_vec()),
         "비전자기록물 이관계획.hwpx" => Some(FORM_TRANSFER_PLAN_BYTES.to_vec()),
         "비전자기록물 인계인수서.hwpx" => Some(FORM_HANDOVER_BYTES.to_vec()),
+        "회의록서식(대면회의).hwpx" => Some(FORM_MINUTES_IN_PERSON_BYTES.to_vec()),
+        "회의록서식(서면회의).hwpx" => Some(FORM_MINUTES_WRITTEN_BYTES.to_vec()),
+        "폐기공인 이관.hwpx" => Some(FORM_DISCARDED_SEAL_BYTES.to_vec()),
+        "교육행정박물관리대장.hwpx" => Some(FORM_HISTORICAL_ARTIFACTS_BYTES.to_vec()),
         _ => None,
     }
 }
@@ -142,10 +150,10 @@ fn save_single_form(app: tauri::AppHandle, file_name: String) -> SaveFileResult 
     }
 }
 
-/// 업무서식 5종 일괄 저장 (Windows 폴더 선택 대화상자)
+/// 업무서식 9종 일괄 저장 (Windows 폴더 선택 대화상자)
 #[tauri::command]
 fn save_all_forms(app: tauri::AppHandle, file_names: Vec<String>) -> SaveAllFormsResult {
-    let mut dialog = rfd::FileDialog::new().set_title("업무서식 5종을 저장할 폴더를 선택하세요");
+    let mut dialog = rfd::FileDialog::new().set_title("업무서식 9종을 저장할 폴더를 선택하세요");
 
     if let Ok(download_dir) = app.path().download_dir() {
         dialog = dialog.set_directory(download_dir);

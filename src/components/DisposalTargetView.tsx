@@ -26,6 +26,8 @@ interface DisposalTargetViewProps {
   onDisposeRecords: (recordIds: string[], reason?: string, customDate?: string) => void;
   onDeferRecords: (recordIds: string[]) => void;
   onUndeferRecords: (recordIds: string[]) => void;
+  baseYear?: number;
+  onBaseYearChange?: (year: number) => void;
 }
 
 const APPLICABLE_PERIODS: RetentionPeriod[] = ['10년', '5년', '3년', '1년'];
@@ -36,10 +38,22 @@ export const DisposalTargetView: React.FC<DisposalTargetViewProps> = ({
   onDisposeRecords,
   onDeferRecords,
   onUndeferRecords,
+  baseYear: propBaseYear,
+  onBaseYearChange,
 }) => {
   const currentYear = new Date().getFullYear();
   // 기준연도 기본값: 현재연도-1 (작년), '올해' 버튼을 통해 올해로 전환 가능
-  const [baseYear, setBaseYear] = useState<number>(currentYear - 1);
+  const [internalBaseYear, setInternalBaseYear] = useState<number>(currentYear - 1);
+  const baseYear = propBaseYear !== undefined ? propBaseYear : internalBaseYear;
+
+  const setBaseYear = (update: number | ((prev: number) => number)) => {
+    const nextVal = typeof update === 'function' ? update(baseYear) : update;
+    if (onBaseYearChange) {
+      onBaseYearChange(nextVal);
+    } else {
+      setInternalBaseYear(nextVal);
+    }
+  };
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedPeriod, setSelectedPeriod] = useState<string>('ALL');
   const [viewMode, setViewMode] = useState<'target' | 'deferred'>('target');

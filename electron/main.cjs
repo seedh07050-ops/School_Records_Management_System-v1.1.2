@@ -95,7 +95,7 @@ function createMainWindow() {
             dialog.showMessageBox(mainWindow, {
               type: 'info',
               title: '학교 기록물 관리 시스템',
-              message: '학교 기록물 관리 시스템 v1.0.0',
+              message: '학교 기록물 관리 시스템 v1.1.3',
               detail: '학교 기록물 등록, 과제카드 추천, 상자 라벨 및 서식 다운로드 데스크톱 앱\n(Windows .exe 대응 Electron 빌드)',
               buttons: ['확인'],
             });
@@ -235,11 +235,11 @@ ipcMain.handle('forms:saveSingle', async (event, fileName) => {
   }
 });
 
-// 전체 서식 5종 일괄 저장 핸들러 (폴더 선택 후 한 번에 모두 저장)
+// 전체 업무서식 일괄 저장 핸들러 (폴더 선택 후 한 번에 모두 저장)
 ipcMain.handle('forms:saveAll', async (event, fileNames) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   const openResult = await dialog.showOpenDialog(win, {
-    title: '업무서식 5종을 저장할 폴더를 선택하세요',
+    title: '업무서식을 저장할 폴더를 선택하세요',
     defaultPath: app.getPath('downloads'),
     properties: ['openDirectory', 'createDirectory'],
     buttonLabel: '이 폴더에 저장',

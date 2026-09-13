@@ -108,6 +108,10 @@ export default function App() {
   // 기본 화면을 「입력」 탭으로 설정 (사용자의 요청 시 즉시 입력 화면 표시)
   const [currentMenu, setCurrentMenu] = useState<MenuKey>('input');
 
+  // 폐기대상 기준연도 상태 (기본값: 작년)
+  const currentYear = new Date().getFullYear();
+  const [disposalBaseYear, setDisposalBaseYear] = useState<number>(currentYear - 1);
+
   // 전역 확인 모달 상태
   const [appConfirmModal, setAppConfirmModal] = useState<{
     isOpen: boolean;
@@ -427,6 +431,7 @@ export default function App() {
         currentMenu={currentMenu}
         onSelectMenu={(menu) => setCurrentMenu(menu)}
         records={records}
+        disposalBaseYear={disposalBaseYear}
       />
 
       {/* Main Content Area */}
@@ -586,6 +591,8 @@ export default function App() {
               onDisposeRecords={handleDisposeRecords}
               onDeferRecords={handleDeferRecords}
               onUndeferRecords={handleUndeferRecords}
+              baseYear={disposalBaseYear}
+              onBaseYearChange={setDisposalBaseYear}
             />
           )}
 

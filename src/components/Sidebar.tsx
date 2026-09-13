@@ -20,9 +20,15 @@ interface SidebarProps {
   currentMenu: MenuKey;
   onSelectMenu: (menu: MenuKey) => void;
   records: RecordItem[];
+  disposalBaseYear?: number;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentMenu, onSelectMenu, records }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  currentMenu,
+  onSelectMenu,
+  records,
+  disposalBaseYear,
+}) => {
   // 활성 기록물 계산 (완료 상태 & 미폐기 & 미이관)
   const activeRecords = records.filter((r) => r.is_completed && !r.is_disposed && !r.is_transferred);
   const pendingInputCount = records.filter((r) => !r.is_completed && !r.is_disposed && !r.is_transferred).length;
@@ -30,11 +36,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentMenu, onSelectMenu, rec
   const transferredCount = records.filter((r) => r.is_transferred && !r.is_disposed).length;
 
   const currentYear = new Date().getFullYear();
+  // 기준연도: 기본 작년(currentYear - 1) 기준
+  const effectiveDisposalYear = disposalBaseYear ?? (currentYear - 1);
   const disposalTargetCount = records.filter((r) => {
     if (!r.is_completed || r.is_disposed || r.is_transferred || r.is_disposal_deferred) return false;
     if (!['10년', '5년', '3년', '1년'].includes(r.retention_period)) return false;
     const exp = parseInt(calculateExpiryYear(r.end_year, r.retention_period), 10);
-    return !isNaN(exp) && exp <= currentYear;
+    return !isNaN(exp) && exp <= effectiveDisposalYear;
   }).length;
 
   const countByPeriod = (period: RetentionPeriod): number => {
@@ -153,7 +161,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentMenu, onSelectMenu, rec
           key: 'forms' as MenuKey,
           label: '업무서식',
           icon: FileText,
-          badge: '5종',
+          badge: '9종',
           badgeColor: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold',
         },
         {
@@ -179,7 +187,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentMenu, onSelectMenu, rec
                 학교 기록물 관리
               </h1>
               <span className="text-[10px] bg-blue-500/20 text-blue-300 font-semibold px-1.5 py-0.5 rounded border border-blue-500/30 leading-none">
-                v1.1.2
+                v1.1.3
               </span>
             </div>
             <p className="text-xs text-slate-400 font-medium">비전자 기록물 관리 시스템</p>

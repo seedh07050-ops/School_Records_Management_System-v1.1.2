@@ -223,10 +223,10 @@ export const desktopBridge: DesktopAPI = {
   },
 
   /**
-   * 5종 업무서식 일괄 저장:
-   * 1. Tauri: Rust 네이티브 폴더 선택 다이얼로그 + 5종 동시 기록
+   * 9종 업무서식 일괄 저장:
+   * 1. Tauri: Rust 네이티브 폴더 선택 다이얼로그 + 9종 동시 기록
    * 2. Electron: IPC forms:saveAll
-   * 3. Web: 5종 순차 Blob 다운로드
+   * 3. Web: 9종 순차 Blob 다운로드
    */
   async saveAllForms(fileNames: string[]): Promise<SaveAllFormsResult> {
     if (isTauriEnvironment()) {

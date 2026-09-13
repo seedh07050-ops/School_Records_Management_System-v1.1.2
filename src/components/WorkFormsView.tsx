@@ -11,6 +11,10 @@ import {
   FileSignature,
   Loader2,
   FolderDown,
+  Users,
+  FileEdit,
+  Stamp,
+  Landmark,
 } from 'lucide-react';
 import { desktopBridge, isTauriEnvironment, isDesktopApp } from '../utils/desktopBridge';
 
@@ -63,6 +67,30 @@ export const WorkFormsView: React.FC<WorkFormsViewProps> = () => {
       fileName: '비전자기록물 인계인수서.hwpx',
       icon: FileSignature,
     },
+    {
+      id: 'minutes_in_person',
+      name: '회의록서식(대면회의)',
+      fileName: '회의록서식(대면회의).hwpx',
+      icon: Users,
+    },
+    {
+      id: 'minutes_written',
+      name: '회의록서식(서면회의)',
+      fileName: '회의록서식(서면회의).hwpx',
+      icon: FileEdit,
+    },
+    {
+      id: 'discarded_seal',
+      name: '폐기공인 이관',
+      fileName: '폐기공인 이관.hwpx',
+      icon: Stamp,
+    },
+    {
+      id: 'historical_artifacts',
+      name: '교육행정박물관리대장',
+      fileName: '교육행정박물관리대장.hwpx',
+      icon: Landmark,
+    },
   ];
 
   const handleDownload = async (form: FormItem) => {
@@ -91,8 +119,8 @@ export const WorkFormsView: React.FC<WorkFormsViewProps> = () => {
       if (res.success) {
         setDownloadSuccessMessage(
           res.folderPath
-            ? `업무서식 5종이 선택하신 폴더(${res.folderPath})에 성공적으로 저장되었습니다.`
-            : '업무서식 5종이 모두 다운로드되었습니다.'
+            ? `업무서식 ${forms.length}종이 선택하신 폴더(${res.folderPath})에 성공적으로 저장되었습니다.`
+            : `업무서식 ${forms.length}종이 모두 다운로드되었습니다.`
         );
         setTimeout(() => setDownloadSuccessMessage(null), 5000);
       } else if (!res.canceled && res.errors && res.errors.length > 0) {
@@ -114,7 +142,7 @@ export const WorkFormsView: React.FC<WorkFormsViewProps> = () => {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
-                표준 서식 5종
+                표준 서식 {forms.length}종
               </span>
               {isDesktop && (
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
@@ -144,7 +172,7 @@ export const WorkFormsView: React.FC<WorkFormsViewProps> = () => {
               ) : (
                 <Download className="w-4 h-4" />
               )}
-              {isDesktop ? '폴더 선택 후 전체 저장 (5종)' : '전체 서식 다운로드 (5종)'}
+              {isDesktop ? `폴더 선택 후 전체 저장 (${forms.length}종)` : `전체 서식 다운로드 (${forms.length}종)`}
             </button>
           </div>
         </div>
