@@ -137,6 +137,9 @@ export const Header: React.FC<HeaderProps> = ({
               <h1 className="text-xl font-bold text-slate-900 tracking-tight">
                 학교 기록물 관리
               </h1>
+              <span className="bg-slate-100 text-slate-700 text-xs font-semibold px-2 py-0.5 rounded border border-slate-200">
+                v1.1.2
+              </span>
               <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-2 py-0.5 rounded border border-blue-200">
                 표준 보존기록대장
               </span>

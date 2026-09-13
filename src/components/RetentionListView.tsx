@@ -4,6 +4,7 @@ import {
   RecordType,
   RetentionPeriod,
   RETENTION_PERIODS,
+  DepartmentMeta,
 } from '../types';
 import {
   Search,
@@ -34,6 +35,7 @@ import { ConfirmModal } from './ConfirmModal';
 interface RetentionListViewProps {
   currentPeriod: RetentionPeriod;
   records: RecordItem[];
+  meta?: DepartmentMeta;
   onUpdateRecord: (updatedRecord: RecordItem) => void;
   onUpdateRecords?: (updatedRecords: RecordItem[]) => void;
   onDeleteRecords?: (recordIds: string[]) => void;
@@ -48,6 +50,7 @@ type SortOrder = 'asc' | 'desc';
 export const RetentionListView: React.FC<RetentionListViewProps> = ({
   currentPeriod,
   records,
+  meta,
   onUpdateRecord,
   onUpdateRecords,
   onDeleteRecords,
@@ -1126,13 +1129,15 @@ export const RetentionListView: React.FC<RetentionListViewProps> = ({
                         <span className="font-semibold text-slate-900 leading-snug">
                           {record.title}
                         </span>
-                        {record.production_school && (
-                          <div className="mt-0.5">
-                            <span className="inline-block text-[10px] text-blue-700 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5 font-medium">
-                              생산: {record.production_school}
-                            </span>
-                          </div>
-                        )}
+                        {record.production_school &&
+                          record.production_school.trim() !== '' &&
+                          (!meta?.department || record.production_school.trim() !== meta.department.trim()) && (
+                            <div className="mt-0.5">
+                              <span className="inline-block text-[10px] text-blue-700 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5 font-medium">
+                                생산: {record.production_school}
+                              </span>
+                            </div>
+                          )}
                       </td>
 
                       {/* Box No */}

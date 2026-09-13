@@ -4,7 +4,7 @@
   "description": "학교 기록물 관리 시스템 - Windows 데스크톱 애플리케이션",
   "author": "School Record Management",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.2",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {

@@ -3,8 +3,6 @@ import {
   RecordItem,
   DepartmentMeta,
   TaskCard,
-  RetentionPeriod,
-  RETENTION_PERIODS,
   FullExcelImportResult,
 } from '../types';
 import {
@@ -13,7 +11,6 @@ import {
   Upload,
   Layers,
   Archive,
-  Clock,
   Loader2,
   AlertTriangle,
   Check,
@@ -21,7 +18,6 @@ import {
 } from 'lucide-react';
 import {
   exportRecordsToExcel,
-  exportPeriodRecordsToExcel,
   parseFullExcelBackupFile,
 } from '../utils/excelUtils';
 
@@ -72,27 +68,6 @@ export const ExcelExportView: React.FC<ExcelExportViewProps> = ({
     }
   };
 
-  // 보존기간별 개별 대장 다운로드 (요구사항 14)
-  const handleDownloadPeriod = async (period: RetentionPeriod) => {
-    try {
-      setExportStatus(null);
-      const res = await exportPeriodRecordsToExcel(period, records, meta);
-      if (res?.success && res?.filePath) {
-        setExportStatus({
-          message: `${period} 기록물대장이 성공적으로 저장되었습니다. (저장 경로: ${res.filePath})`,
-          type: 'success',
-        });
-      } else if (res?.error) {
-        setExportStatus({ message: res.error, type: 'error' });
-      }
-    } catch (err: any) {
-      setExportStatus({
-        message: err?.message || '엑셀 내보내기 중 오류가 발생했습니다.',
-        type: 'error',
-      });
-    }
-  };
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -127,27 +102,17 @@ export const ExcelExportView: React.FC<ExcelExportViewProps> = ({
     }
   };
 
-  const periodBadges: Record<RetentionPeriod, { bg: string; text: string }> = {
-    '영구': { bg: 'bg-red-100', text: 'text-red-700' },
-    '준영구': { bg: 'bg-orange-100', text: 'text-orange-700' },
-    '30년': { bg: 'bg-amber-100', text: 'text-amber-800' },
-    '10년': { bg: 'bg-emerald-100', text: 'text-emerald-800' },
-    '5년': { bg: 'bg-sky-100', text: 'text-sky-800' },
-    '3년': { bg: 'bg-indigo-100', text: 'text-indigo-800' },
-    '1년': { bg: 'bg-slate-100', text: 'text-slate-700' },
-  };
-
-  // 13개 시트 규격 안내
+  // 12개 시트 규격 안내
   const sheetsInfo = [
     { name: '표지 및 현황', desc: '기관명, 처리과, 기준일자 및 보존기간별 총괄 현황 집계표 (공문 서식)', count: `${activeRecords.length}건 집계` },
-    { name: '입력 (신규/일괄)', desc: '학교 행정실 기록물 신규 등록 표준 서식 및 작성 중 행', count: `${pendingRecords.length}건 작성중` },
-    { name: '영구', desc: '10. 문서고보존기록대장 표준 서식 (14개 항목 2단 헤더, 만료일자 수식/서식 연동)', count: `${records.filter(r => r.is_completed && !r.is_disposed && !r.is_transferred && r.retention_period === '영구').length}건` },
-    { name: '준영구', desc: '10. 문서고보존기록대장 표준 서식 (14개 항목 2단 헤더, 만료일자 수식/서식 연동)', count: `${records.filter(r => r.is_completed && !r.is_disposed && !r.is_transferred && r.retention_period === '준영구').length}건` },
-    { name: '30년', desc: '10. 문서고보존기록대장 표준 서식 (14개 항목 2단 헤더, 만료일자 수식/서식 연동)', count: `${records.filter(r => r.is_completed && !r.is_disposed && !r.is_transferred && r.retention_period === '30년').length}건` },
-    { name: '10년', desc: '10. 문서고보존기록대장 표준 서식 (14개 항목 2단 헤더, 만료일자 수식/서식 연동)', count: `${records.filter(r => r.is_completed && !r.is_disposed && !r.is_transferred && r.retention_period === '10년').length}건` },
-    { name: '5년', desc: '10. 문서고보존기록대장 표준 서식 (14개 항목 2단 헤더, 만료일자 수식/서식 연동)', count: `${records.filter(r => r.is_completed && !r.is_disposed && !r.is_transferred && r.retention_period === '5년').length}건` },
-    { name: '3년', desc: '10. 문서고보존기록대장 표준 서식 (14개 항목 2단 헤더, 만료일자 수식/서식 연동)', count: `${records.filter(r => r.is_completed && !r.is_disposed && !r.is_transferred && r.retention_period === '3년').length}건` },
-    { name: '1년', desc: '10. 문서고보존기록대장 표준 서식 (14개 항목 2단 헤더, 만료일자 수식/서식 연동)', count: `${records.filter(r => r.is_completed && !r.is_disposed && !r.is_transferred && r.retention_period === '1년').length}건` },
+    { name: '입력 (신규/일괄)', desc: '학교 기록물 신규 및 일괄 등록', count: `${pendingRecords.length}건 작성중` },
+    { name: '영구', desc: '문서고보존기록대장 표준 서식 (14개 항목 2단 헤더, 만료일자 수식/서식 연동)', count: `${records.filter(r => r.is_completed && !r.is_disposed && !r.is_transferred && r.retention_period === '영구').length}건` },
+    { name: '준영구', desc: '문서고보존기록대장 표준 서식 (14개 항목 2단 헤더, 만료일자 수식/서식 연동)', count: `${records.filter(r => r.is_completed && !r.is_disposed && !r.is_transferred && r.retention_period === '준영구').length}건` },
+    { name: '30년', desc: '문서고보존기록대장 표준 서식 (14개 항목 2단 헤더, 만료일자 수식/서식 연동)', count: `${records.filter(r => r.is_completed && !r.is_disposed && !r.is_transferred && r.retention_period === '30년').length}건` },
+    { name: '10년', desc: '문서고보존기록대장 표준 서식 (14개 항목 2단 헤더, 만료일자 수식/서식 연동)', count: `${records.filter(r => r.is_completed && !r.is_disposed && !r.is_transferred && r.retention_period === '10년').length}건` },
+    { name: '5년', desc: '문서고보존기록대장 표준 서식 (14개 항목 2단 헤더, 만료일자 수식/서식 연동)', count: `${records.filter(r => r.is_completed && !r.is_disposed && !r.is_transferred && r.retention_period === '5년').length}건` },
+    { name: '3년', desc: '문서고보존기록대장 표준 서식 (14개 항목 2단 헤더, 만료일자 수식/서식 연동)', count: `${records.filter(r => r.is_completed && !r.is_disposed && !r.is_transferred && r.retention_period === '3년').length}건` },
+    { name: '1년', desc: '문서고보존기록대장 표준 서식 (14개 항목 2단 헤더, 만료일자 수식/서식 연동)', count: `${records.filter(r => r.is_completed && !r.is_disposed && !r.is_transferred && r.retention_period === '1년').length}건` },
     { name: '과제카드', desc: '과제카드명, 기준 보존기간, 주요 업무 설명', count: `${taskCards.length}개 기준` },
     { name: '라벨정보', desc: '상자번호 및 서가번호별 수록 기록물 목록 및 라벨 색인', count: '상자별 집계' },
     { name: '폐기목록', desc: '폐기 처리된 기록물 스냅샷 및 폐기일자 이력 대장', count: `${disposedRecords.length}건 보존` },
@@ -233,53 +198,7 @@ export const ExcelExportView: React.FC<ExcelExportViewProps> = ({
         </div>
       </div>
 
-      {/* 2. 보존기간별 개별 대장 다운로드 섹션 (요구사항 14) */}
-      <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-2xs space-y-4">
-        <div>
-          <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-blue-600" />
-            보존기간별 개별 대장 다운로드
-          </h3>
-          <p className="text-xs text-slate-500 mt-1">
-            필요한 특정 보존기간의 기록물철 등록대장만 선택하여 개별 엑셀 파일(.xlsx)로 즉시 다운로드할 수 있습니다.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {RETENTION_PERIODS.map((period) => {
-            const count = records.filter(
-              (r) => r.is_completed && !r.is_disposed && !r.is_transferred && r.retention_period === period
-            ).length;
-            const badge = periodBadges[period];
-
-            return (
-              <div
-                key={period}
-                className="bg-slate-50 border border-slate-200 rounded-lg p-3.5 flex flex-col justify-between gap-3 hover:border-blue-300 transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm text-slate-900">{period}</span>
-                  <span
-                    className={`text-xs font-bold px-2 py-0.5 rounded-full ${badge.bg} ${badge.text}`}
-                  >
-                    {count}건
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleDownloadPeriod(period)}
-                  className="w-full py-1.5 px-3 bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 rounded text-xs font-semibold inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
-                >
-                  <Download className="w-3.5 h-3.5 text-blue-600" />
-                  <span>{period} 대장 다운로드</span>
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 3. 통합 문서 내 12개 시트 구성 상세 안내 */}
+      {/* 2. 통합 문서 내 12개 시트 구성 상세 안내 */}
       <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-2xs space-y-4">
         <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
           <Layers className="w-4 h-4 text-emerald-600" />

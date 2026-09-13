@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ChevronUp,
   Search,
+  Type,
 } from 'lucide-react';
 import {
   DEFAULT_HWP_TEMPLATE,
@@ -35,6 +36,10 @@ export const LabelsView: React.FC<LabelsViewProps> = ({ records, meta }) => {
   const [expandedBoxNos, setExpandedBoxNos] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const [printModalBoxes, setPrintModalBoxes] = useState<BoxGroup[] | null>(null);
+
+  // 요구사항 6: 업무명 글씨크기 설정 상태
+  const [isCustomFontSize, setIsCustomFontSize] = useState<boolean>(false);
+  const [taskFontSize, setTaskFontSize] = useState<number>(8); // 기본값 8pt
 
   // 검색 필터링
   const filteredBoxes = useMemo(() => {
@@ -137,6 +142,55 @@ export const LabelsView: React.FC<LabelsViewProps> = ({ records, meta }) => {
         </div>
       )}
 
+      {/* 요구사항 6: 업무명 글씨크기 설정 바 (윗부분) */}
+      <div className="bg-white border border-slate-200 rounded-lg p-3.5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-1.5 text-slate-800 font-bold">
+            <Type className="w-4 h-4 text-indigo-600" />
+            <span>라벨 업무명 글씨크기:</span>
+          </div>
+
+          <label className="flex items-center gap-1.5 cursor-pointer select-none bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded px-2.5 py-1.5 font-semibold text-slate-800 transition-colors">
+            <input
+              type="checkbox"
+              checked={isCustomFontSize}
+              onChange={(e) => setIsCustomFontSize(e.target.checked)}
+              className="rounded border-slate-400 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+            />
+            <span>글씨크기 변경</span>
+          </label>
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-slate-500 font-medium">크기:</span>
+            <select
+              disabled={!isCustomFontSize}
+              value={taskFontSize}
+              onChange={(e) => setTaskFontSize(Number(e.target.value))}
+              className="border border-slate-300 rounded px-2.5 py-1 text-xs font-semibold bg-white text-slate-800 focus:outline-indigo-600 disabled:opacity-40 disabled:bg-slate-100 disabled:cursor-not-allowed cursor-pointer shadow-2xs"
+            >
+              <option value={5}>5pt (가장 작게 - 다량 기록물)</option>
+              <option value={6}>6pt (매우 작게)</option>
+              <option value={7}>7pt (작게)</option>
+              <option value={8}>8pt (표준 크기)</option>
+              <option value={9}>9pt (약간 크게)</option>
+              <option value={10}>10pt (크게)</option>
+              <option value={11}>11pt (더 크게)</option>
+              <option value={12}>12pt (가장 크게)</option>
+            </select>
+          </div>
+
+          {isCustomFontSize && (
+            <span className="text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded font-semibold text-[11px]">
+              적용 크기: {taskFontSize}pt (화면 미리보기 및 출력물에 즉시 반영됩니다)
+            </span>
+          )}
+        </div>
+
+        <div className="text-slate-500 text-[11px]">
+          ※ 체크 시 각 상자 표지 라벨의 업무명(철제목) 폰트 크기가 설정한 크기로 일괄 변경됩니다.
+        </div>
+      </div>
+
       {/* Sticky Search and Selection Control Bar (스크롤 내려도 상단에 고정) */}
       <div className="sticky top-14 z-20 bg-white/95 backdrop-blur-md border border-slate-300 rounded-lg p-3 shadow-md flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2 w-full sm:w-80">
@@ -150,7 +204,35 @@ export const LabelsView: React.FC<LabelsViewProps> = ({ records, meta }) => {
           />
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end flex-wrap">
+          {/* 스크롤 중에도 빠른 글씨크기 조절 가능 */}
+          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2 py-1 rounded">
+            <label className="flex items-center gap-1 cursor-pointer select-none font-medium text-slate-700">
+              <input
+                type="checkbox"
+                checked={isCustomFontSize}
+                onChange={(e) => setIsCustomFontSize(e.target.checked)}
+                className="rounded border-slate-400 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5 cursor-pointer"
+              />
+              <span>글씨크기 변경:</span>
+            </label>
+            <select
+              disabled={!isCustomFontSize}
+              value={taskFontSize}
+              onChange={(e) => setTaskFontSize(Number(e.target.value))}
+              className="border border-slate-300 rounded px-1.5 py-0.5 text-xs font-semibold bg-white text-slate-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <option value={5}>5pt</option>
+              <option value={6}>6pt</option>
+              <option value={7}>7pt</option>
+              <option value={8}>8pt</option>
+              <option value={9}>9pt</option>
+              <option value={10}>10pt</option>
+              <option value={11}>11pt</option>
+              <option value={12}>12pt</option>
+            </select>
+          </div>
+
           <label className="flex items-center gap-1.5 cursor-pointer select-none font-semibold text-slate-700">
             <input
               type="checkbox"
@@ -158,7 +240,7 @@ export const LabelsView: React.FC<LabelsViewProps> = ({ records, meta }) => {
               onChange={(e) => handleToggleSelectAll(e.target.checked)}
               className="rounded border-slate-400 text-indigo-600 focus:ring-indigo-500"
             />
-            전체 상자 선택 ({selectedBoxNos.size}/{filteredBoxes.length})
+            전체 선택 ({selectedBoxNos.size}/{filteredBoxes.length})
           </label>
 
           {/* 스크롤 시에도 바로 누를 수 있는 상단 고정 인쇄 버튼 */}
@@ -353,10 +435,16 @@ export const LabelsView: React.FC<LabelsViewProps> = ({ records, meta }) => {
                                   {box.records.map((rec) => (
                                     <div
                                       key={rec.record_id}
-                                      className="text-[11px] font-bold text-slate-900 truncate flex items-center gap-1.5"
+                                      style={isCustomFontSize ? { fontSize: `${taskFontSize}pt`, lineHeight: 1.3 } : undefined}
+                                      className={`${!isCustomFontSize ? 'text-[11px]' : ''} font-bold text-slate-900 truncate flex items-center gap-1.5`}
                                       title={rec.title}
                                     >
-                                      <span className="text-[8px] text-slate-900 select-none">■</span>
+                                      <span
+                                        style={isCustomFontSize ? { fontSize: `${Math.max(4, taskFontSize - 2)}pt` } : undefined}
+                                        className="text-[8px] text-slate-900 select-none shrink-0"
+                                      >
+                                        ■
+                                      </span>
                                       <span className="truncate">{rec.title}</span>
                                     </div>
                                   ))}
@@ -428,6 +516,15 @@ export const LabelsView: React.FC<LabelsViewProps> = ({ records, meta }) => {
         onClose={() => setPrintModalBoxes(null)}
         boxes={printModalBoxes || []}
         meta={meta}
+        customTaskFontSize={isCustomFontSize ? taskFontSize : null}
+        onCustomFontSizeChange={(size) => {
+          if (size === null) {
+            setIsCustomFontSize(false);
+          } else {
+            setIsCustomFontSize(true);
+            setTaskFontSize(size);
+          }
+        }}
       />
     </div>
   );

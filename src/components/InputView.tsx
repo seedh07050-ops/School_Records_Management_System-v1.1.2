@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   RecordItem,
   RecordType,
@@ -111,8 +111,10 @@ export const InputView: React.FC<InputViewProps> = ({
 
   const [selectedLocalIds, setSelectedLocalIds] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // 각 행의 기록물철제목 input 요소를 가리키는 ref 맵 (엔터 시 다음 행 자동 포커스용)
+  // 각 행의 기록물철제목 input 요소를 가리키는 ref 맵
   const titleInputRefs = useRef<Map<string, HTMLInputElement>>(new Map());
+  // 각 행의 유형(record_type) select 요소를 가리키는 ref 맵 (엔터 시 다음 행 [유형] 자동 포커스용)
+  const typeSelectRefs = useRef<Map<string, HTMLSelectElement>>(new Map());
 
   // 과제카드 유사도 추천 모달 상태 (단건 추천)
   const [aiModalOpen, setAiModalOpen] = useState(false);
@@ -205,21 +207,21 @@ export const InputView: React.FC<InputViewProps> = ({
       return [...prev, newRow];
     });
 
-    // 새로 추가된 행의 기록물철제목 입력란으로 키보드 커서(포커스) 자동 이동
+    // 새로 추가된 행의 [유형] 선택란으로 키보드 커서(포커스) 자동 이동 (요구사항 1, 5)
     setTimeout(() => {
-      const input = titleInputRefs.current.get(newId);
-      if (input) {
-        input.focus();
-        input.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const select = typeSelectRefs.current.get(newId);
+      if (select) {
+        select.focus();
+        select.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     }, 40);
 
     return newId;
   };
 
-  // 각 행의 입력 필드에서 엔터(Enter)를 누르면 다음 행이 추가되고 다음 행의 제목 입력 필드로 커서 이동
+  // 각 행의 입력 필드 및 선택 박스에서 엔터(Enter)를 누르면 다음 행이 추가되고 다음 행의 [유형]으로 커서 이동 (요구사항 1)
   const handleInputKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>,
+    e: React.KeyboardEvent<HTMLInputElement | HTMLSelectElement>,
     currentIndex: number
   ) => {
     // 한글 조합(IME) 중 발생하는 엔터 키 이벤트는 중복 방지를 위해 무시
@@ -228,17 +230,19 @@ export const InputView: React.FC<InputViewProps> = ({
     if (e.key === 'Enter') {
       e.preventDefault();
 
-      // 마지막 행이면 무조건 새 행 추가 후 커서 이동
+      // 마지막 행이면 무조건 새 행 추가 후 새 행의 [유형]으로 커서 이동
       if (currentIndex === draftRows.length - 1) {
         handleAddRow();
       } else {
-        // 이미 다음 행이 있는 경우, 다음 행의 제목이 비어있으면 해당 행으로 커서 이동, 이미 내용이 있으면 새 행 삽입 후 커서 이동
+        // 다음 행이 있는 경우 다음 행의 [유형]으로 포커스 이동
         const nextRow = draftRows[currentIndex + 1];
-        if (nextRow && !nextRow.title.trim()) {
-          const nextInput = titleInputRefs.current.get(nextRow.localId);
-          if (nextInput) {
-            nextInput.focus();
-            nextInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (nextRow) {
+          const nextSelect = typeSelectRefs.current.get(nextRow.localId);
+          if (nextSelect) {
+            nextSelect.focus();
+            nextSelect.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          } else {
+            handleAddRow(currentIndex);
           }
         } else {
           handleAddRow(currentIndex);
@@ -246,6 +250,23 @@ export const InputView: React.FC<InputViewProps> = ({
       }
     }
   };
+
+  // 입력 대기 목록이 아예 비어있는 경우에도 엔터(Enter)를 누르면 행 추가하기가 되고 [유형]에 커서가 이동 (요구사항 5)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (draftRows.length === 0 && e.key === 'Enter' && !e.isComposing) {
+        const activeTag = (document.activeElement?.tagName || '').toLowerCase();
+        // 사용자가 다른 텍스트 입력창이나 모달 내부에서 작업 중이 아닌 경우에만 실행
+        if (activeTag !== 'input' && activeTag !== 'textarea') {
+          e.preventDefault();
+          handleAddRow();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [draftRows.length]);
 
   // 요구사항 3: 엑셀 서식 다운로드
   const handleDownloadExcelTemplate = async () => {
@@ -732,7 +753,7 @@ export const InputView: React.FC<InputViewProps> = ({
             </span>
           </div>
           <div className="text-slate-600 font-medium flex items-center gap-1">
-            <span className="text-blue-600 font-bold">💡 Tip:</span> 각 행을 입력하고 <kbd className="px-1.5 py-0.5 bg-slate-200 border border-slate-300 rounded font-mono text-[10px] text-slate-800">Enter</kbd>를 누르면 다음 행이 자동 추가되고 커서가 이동합니다.
+            <span className="text-blue-600 font-bold">💡 Tip:</span> 각 행을 입력하고 <kbd className="px-1.5 py-0.5 bg-slate-200 border border-slate-300 rounded font-mono text-[10px] text-slate-800">Enter</kbd>를 누르면 다음 행이 자동 추가되고 <span className="font-bold text-blue-700">[유형]</span>으로 커서가 이동합니다. (목록이 비어있을 때도 Enter를 누르면 행이 추가됩니다)
           </div>
         </div>
 
@@ -777,15 +798,15 @@ export const InputView: React.FC<InputViewProps> = ({
                   <td colSpan={13} className="p-8 text-center text-slate-500 bg-slate-50">
                     <p className="font-semibold text-slate-700 text-sm mb-1">입력 대기 목록이 비어 있습니다.</p>
                     <p className="text-xs text-slate-500 mb-3">
-                      상단의 [대량입력 Excel 서식 업로드]를 이용하거나 아래 [새로운 행 추가] 버튼을 눌러 기록물을 작성하세요.
+                      상단의 [대량입력 Excel 서식 업로드]를 이용하거나 아래 [직접 입력 행 추가하기] 버튼 또는 <kbd className="px-1.5 py-0.5 bg-slate-200 border border-slate-300 rounded font-mono text-[11px] text-slate-800 font-bold">Enter</kbd> 키를 눌러 기록물을 작성하세요.
                     </p>
                     <button
                       type="button"
-                      onClick={handleAddRow}
+                      onClick={() => handleAddRow()}
                       className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      직접 입력 행 추가하기
+                      직접 입력 행 추가하기 (Enter)
                     </button>
                   </td>
                 </tr>
@@ -819,9 +840,14 @@ export const InputView: React.FC<InputViewProps> = ({
                       {/* Record Type */}
                       <td className="p-1 text-center">
                         <select
+                          ref={(el) => {
+                            if (el) typeSelectRefs.current.set(row.localId, el);
+                            else typeSelectRefs.current.delete(row.localId);
+                          }}
                           value={row.record_type}
                           onChange={(e) => handleRowChange(row.localId, 'record_type', e.target.value as RecordType)}
-                          className="w-full text-xs border border-slate-300 rounded px-1.5 py-1 bg-white focus:outline-blue-600 font-medium"
+                          onKeyDown={(e) => handleInputKeyDown(e, idx)}
+                          className="w-full text-xs border border-slate-300 rounded px-1.5 py-1 bg-white focus:outline-blue-600 font-medium cursor-pointer"
                         >
                           <option value="일반">일반</option>
                           <option value="시청각">시청각</option>
@@ -865,7 +891,7 @@ export const InputView: React.FC<InputViewProps> = ({
                           value={row.title}
                           onChange={(e) => handleRowChange(row.localId, 'title', e.target.value)}
                           onKeyDown={(e) => handleInputKeyDown(e, idx)}
-                          placeholder="기록물철 제목을 입력하세요 (엔터 시 다음 행 자동 추가)"
+                          placeholder="기록물철 제목을 입력하세요 (엔터 시 다음 행 [유형]으로 이동)"
                           className="w-full text-xs border border-slate-300 rounded px-2 py-1 font-semibold text-slate-900 focus:outline-blue-600 focus:bg-white"
                         />
                       </td>

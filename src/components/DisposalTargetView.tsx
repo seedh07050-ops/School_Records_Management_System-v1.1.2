@@ -38,7 +38,8 @@ export const DisposalTargetView: React.FC<DisposalTargetViewProps> = ({
   onUndeferRecords,
 }) => {
   const currentYear = new Date().getFullYear();
-  const [baseYear, setBaseYear] = useState<number>(currentYear);
+  // 기준연도 기본값: 현재연도-1 (작년), '올해' 버튼을 통해 올해로 전환 가능
+  const [baseYear, setBaseYear] = useState<number>(currentYear - 1);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedPeriod, setSelectedPeriod] = useState<string>('ALL');
   const [viewMode, setViewMode] = useState<'target' | 'deferred'>('target');

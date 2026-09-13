@@ -141,7 +141,8 @@ export async function analyzeUploadedHwpFile(file: File): Promise<HwpAnalyzedStr
 export function generateSingleLabelCardHtml(
   box: BoxGroup,
   meta: DepartmentMeta,
-  config: HwpTemplateConfig = DEFAULT_HWP_TEMPLATE
+  config: HwpTemplateConfig = DEFAULT_HWP_TEMPLATE,
+  customTaskFontSizePt?: number | null
 ): string {
   // 대표 보존기간 추출 (첫 번째 보존기간 또는 상자번호의 접두사)
   let mainPeriod: RetentionPeriod = '5년';
@@ -170,21 +171,29 @@ export function generateSingleLabelCardHtml(
   let bulletSizePt = 7;
   let gapPx = 2;
 
-  if (totalCount > 12) {
-    fontSizePt = 6.0;
-    lineHeight = 1.15;
-    bulletSizePt = 5.0;
-    gapPx = 0.5;
-  } else if (totalCount > 8) {
-    fontSizePt = 6.8;
-    lineHeight = 1.2;
-    bulletSizePt = 5.8;
-    gapPx = 1;
-  } else if (totalCount > 5) {
-    fontSizePt = 7.4;
-    lineHeight = 1.25;
-    bulletSizePt = 6.4;
-    gapPx = 1.5;
+  // 사용자가 업무명 글씨크기를 직접 설정한 경우 (요구사항 6)
+  if (customTaskFontSizePt && customTaskFontSizePt > 0) {
+    fontSizePt = customTaskFontSizePt;
+    bulletSizePt = Math.max(4, customTaskFontSizePt - 1.5);
+    lineHeight = customTaskFontSizePt <= 7 ? 1.18 : 1.3;
+    gapPx = customTaskFontSizePt <= 6 ? 1 : 1.5;
+  } else {
+    if (totalCount > 12) {
+      fontSizePt = 6.0;
+      lineHeight = 1.15;
+      bulletSizePt = 5.0;
+      gapPx = 0.5;
+    } else if (totalCount > 8) {
+      fontSizePt = 6.8;
+      lineHeight = 1.2;
+      bulletSizePt = 5.8;
+      gapPx = 1;
+    } else if (totalCount > 5) {
+      fontSizePt = 7.4;
+      lineHeight = 1.25;
+      bulletSizePt = 6.4;
+      gapPx = 1.5;
+    }
   }
 
   const itemTitlesHtml = box.records
@@ -281,9 +290,10 @@ export function generateSingleLabelCardHtml(
 export function generatePrintablePagesHtml(
   boxes: BoxGroup[],
   meta: DepartmentMeta,
-  config: HwpTemplateConfig = DEFAULT_HWP_TEMPLATE
+  config: HwpTemplateConfig = DEFAULT_HWP_TEMPLATE,
+  customTaskFontSizePt?: number | null
 ): string[] {
-  const singleCards = boxes.map((box) => generateSingleLabelCardHtml(box, meta, config));
+  const singleCards = boxes.map((box) => generateSingleLabelCardHtml(box, meta, config, customTaskFontSizePt));
   const pagesHtmlList: string[] = [];
   const totalPages = Math.ceil(singleCards.length / 4);
 
@@ -310,9 +320,10 @@ export function generatePrintablePagesHtml(
 export function generatePrintableHwpHtml(
   boxes: BoxGroup[],
   meta: DepartmentMeta,
-  config: HwpTemplateConfig = DEFAULT_HWP_TEMPLATE
+  config: HwpTemplateConfig = DEFAULT_HWP_TEMPLATE,
+  customTaskFontSizePt?: number | null
 ): string {
-  const pagesHtmlList = generatePrintablePagesHtml(boxes, meta, config);
+  const pagesHtmlList = generatePrintablePagesHtml(boxes, meta, config, customTaskFontSizePt);
   const totalPages = Math.ceil(boxes.length / 4);
 
   return `<!DOCTYPE html>

@@ -313,7 +313,7 @@ export const CoverSummaryView: React.FC<CoverSummaryViewProps> = ({
             </div>
           </div>
           <p className="text-xs text-slate-600 mb-3 leading-relaxed">
-            상자번호별로 기록물이 자동 그룹화되어 규격화된 보존용기 표지 라벨을 A4 2분할 규격으로 즉시 인쇄합니다.
+            상자번호별로 기록물이 자동 그룹화되어 규격화된 보존용기 표지 라벨을 A4 4분할 규격으로 즉시 인쇄합니다.
           </p>
           <button
             id="cover-action-go-labels"

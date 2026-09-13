@@ -20,6 +20,8 @@ interface LabelPrintModalProps {
   onClose: () => void;
   boxes: BoxGroup[];
   meta: DepartmentMeta;
+  customTaskFontSize?: number | null;
+  onCustomFontSizeChange?: (size: number | null) => void;
 }
 
 export const LabelPrintModal: React.FC<LabelPrintModalProps> = ({
@@ -27,15 +29,17 @@ export const LabelPrintModal: React.FC<LabelPrintModalProps> = ({
   onClose,
   boxes,
   meta,
+  customTaskFontSize = null,
+  onCustomFontSizeChange,
 }) => {
   const [zoom, setZoom] = useState<number>(0.75); // 기본 미리보기 75%
   const totalPages = Math.ceil(boxes.length / 4);
 
-  // A4 페이지 HTML 목록
+  // A4 페이지 HTML 목록 (customTaskFontSize 반영)
   const pagesHtml = React.useMemo(() => {
     if (!isOpen || boxes.length === 0) return [];
-    return generatePrintablePagesHtml(boxes, meta, DEFAULT_HWP_TEMPLATE);
-  }, [isOpen, boxes, meta]);
+    return generatePrintablePagesHtml(boxes, meta, DEFAULT_HWP_TEMPLATE, customTaskFontSize);
+  }, [isOpen, boxes, meta, customTaskFontSize]);
 
   // 단축키 (Ctrl+P / Esc)
   useEffect(() => {
@@ -63,7 +67,7 @@ export const LabelPrintModal: React.FC<LabelPrintModalProps> = ({
 
   // 2. 새 창에서 열기 (Tauri WebviewWindow 또는 브라우저 팝업 fallback)
   const handleOpenNewWindow = async () => {
-    const fullHtml = generatePrintableHwpHtml(boxes, meta, DEFAULT_HWP_TEMPLATE);
+    const fullHtml = generatePrintableHwpHtml(boxes, meta, DEFAULT_HWP_TEMPLATE, customTaskFontSize);
 
     if (isTauriEnvironment()) {
       try {
@@ -127,31 +131,68 @@ export const LabelPrintModal: React.FC<LabelPrintModalProps> = ({
           </div>
         </div>
 
-        {/* 중앙: 줌 배율 제어 */}
-        <div className="hidden md:flex items-center gap-1.5 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300">
-          <button
-            onClick={() => setZoom((z) => Math.max(0.4, z - 0.1))}
-            className="p-1 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition-colors cursor-pointer"
-            title="축소"
-          >
-            <ZoomOut className="w-4 h-4" />
-          </button>
-          <span className="font-mono w-12 text-center font-bold">
-            {Math.round(zoom * 100)}%
-          </span>
-          <button
-            onClick={() => setZoom((z) => Math.min(1.2, z + 0.1))}
-            className="p-1 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition-colors cursor-pointer"
-            title="확대"
-          >
-            <ZoomIn className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setZoom(0.75)}
-            className="ml-1 text-[11px] px-1.5 py-0.5 hover:bg-slate-700 rounded text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
-          >
-            기본
-          </button>
+        {/* 중앙: 줌 배율 제어 & 업무명 글씨크기 조절 */}
+        <div className="hidden md:flex items-center gap-3">
+          {onCustomFontSizeChange && (
+            <div className="flex items-center gap-1.5 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300">
+              <label className="flex items-center gap-1.5 cursor-pointer select-none text-slate-200 font-medium">
+                <input
+                  type="checkbox"
+                  checked={customTaskFontSize !== null}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      onCustomFontSizeChange(8);
+                    } else {
+                      onCustomFontSizeChange(null);
+                    }
+                  }}
+                  className="rounded border-slate-600 text-indigo-500 focus:ring-indigo-400 w-3.5 h-3.5"
+                />
+                <span>글씨크기 변경:</span>
+              </label>
+              <select
+                disabled={customTaskFontSize === null}
+                value={customTaskFontSize || 8}
+                onChange={(e) => onCustomFontSizeChange(Number(e.target.value))}
+                className="bg-slate-900 border border-slate-600 text-white rounded px-2 py-0.5 text-xs focus:outline-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <option value={5}>5pt (가장 작게)</option>
+                <option value={6}>6pt (매우 작게)</option>
+                <option value={7}>7pt (작게)</option>
+                <option value={8}>8pt (표준)</option>
+                <option value={9}>9pt (약간 크게)</option>
+                <option value={10}>10pt (크게)</option>
+                <option value={11}>11pt (더 크게)</option>
+                <option value={12}>12pt (가장 크게)</option>
+              </select>
+            </div>
+          )}
+
+          <div className="flex items-center gap-1.5 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300">
+            <button
+              onClick={() => setZoom((z) => Math.max(0.4, z - 0.1))}
+              className="p-1 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition-colors cursor-pointer"
+              title="축소"
+            >
+              <ZoomOut className="w-4 h-4" />
+            </button>
+            <span className="font-mono w-12 text-center font-bold">
+              {Math.round(zoom * 100)}%
+            </span>
+            <button
+              onClick={() => setZoom((z) => Math.min(1.2, z + 0.1))}
+              className="p-1 hover:bg-slate-700 rounded text-slate-300 hover:text-white transition-colors cursor-pointer"
+              title="확대"
+            >
+              <ZoomIn className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setZoom(0.75)}
+              className="ml-1 text-[11px] px-1.5 py-0.5 hover:bg-slate-700 rounded text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+            >
+              기본
+            </button>
+          </div>
         </div>
 
         {/* 우측 작업 버튼 */}

@@ -174,10 +174,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentMenu, onSelectMenu, rec
             <Layers className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="font-bold text-sm tracking-tight text-white leading-tight">
-              학교 기록물 관리
-            </h1>
-            <p className="text-xs text-slate-400 font-medium">기록물관리 시스템</p>
+            <div className="flex items-center gap-1.5">
+              <h1 className="font-bold text-sm tracking-tight text-white leading-tight">
+                학교 기록물 관리
+              </h1>
+              <span className="text-[10px] bg-blue-500/20 text-blue-300 font-semibold px-1.5 py-0.5 rounded border border-blue-500/30 leading-none">
+                v1.1.2
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 font-medium">비전자 기록물 관리 시스템</p>
           </div>
         </div>
       </div>

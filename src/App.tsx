@@ -472,6 +472,7 @@ export default function App() {
             <RetentionListView
               currentPeriod="영구"
               records={records}
+              meta={meta}
               onUpdateRecord={handleUpdateRecord}
               onUpdateRecords={handleUpdateRecords}
               onDeleteRecords={handleDeleteRecords}
@@ -485,6 +486,7 @@ export default function App() {
             <RetentionListView
               currentPeriod="준영구"
               records={records}
+              meta={meta}
               onUpdateRecord={handleUpdateRecord}
               onUpdateRecords={handleUpdateRecords}
               onDeleteRecords={handleDeleteRecords}
@@ -498,6 +500,7 @@ export default function App() {
             <RetentionListView
               currentPeriod="30년"
               records={records}
+              meta={meta}
               onUpdateRecord={handleUpdateRecord}
               onUpdateRecords={handleUpdateRecords}
               onDeleteRecords={handleDeleteRecords}
@@ -511,6 +514,7 @@ export default function App() {
             <RetentionListView
               currentPeriod="10년"
               records={records}
+              meta={meta}
               onUpdateRecord={handleUpdateRecord}
               onUpdateRecords={handleUpdateRecords}
               onDeleteRecords={handleDeleteRecords}
@@ -524,6 +528,7 @@ export default function App() {
             <RetentionListView
               currentPeriod="5년"
               records={records}
+              meta={meta}
               onUpdateRecord={handleUpdateRecord}
               onUpdateRecords={handleUpdateRecords}
               onDeleteRecords={handleDeleteRecords}
@@ -537,6 +542,7 @@ export default function App() {
             <RetentionListView
               currentPeriod="3년"
               records={records}
+              meta={meta}
               onUpdateRecord={handleUpdateRecord}
               onUpdateRecords={handleUpdateRecords}
               onDeleteRecords={handleDeleteRecords}
@@ -550,6 +556,7 @@ export default function App() {
             <RetentionListView
               currentPeriod="1년"
               records={records}
+              meta={meta}
               onUpdateRecord={handleUpdateRecord}
               onUpdateRecords={handleUpdateRecords}
               onDeleteRecords={handleDeleteRecords}
